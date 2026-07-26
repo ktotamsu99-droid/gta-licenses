@@ -14,7 +14,7 @@ autoUpdater.autoDownload = false; // Спрашиваем перед скачи�
 autoUpdater.autoInstallOnAppQuit = true; // Устанавливаем при выходе
 
 // ============================================
-// ТЕКУЩАЯ ВЕРСИЯ (ДОЛЖНА СОВПАДАТЬ С package.json)
+// ТЕКУЩАЯ ВЕРСИЯ (БЕРЕМ ИЗ package.json)
 // ============================================
 const CURRENT_VERSION = app.getVersion();
 
@@ -24,6 +24,7 @@ const CURRENT_VERSION = app.getVersion();
 function checkForUpdates(mainWindow) {
     log.info('🔍 Проверка обновлений...');
     log.info(`📌 Текущая версия: ${CURRENT_VERSION}`);
+    log.info(`📌 Репозиторий: ktotamsu99-droid/gta-licenses`);
     
     // Запускаем проверку
     autoUpdater.checkForUpdatesAndNotify();

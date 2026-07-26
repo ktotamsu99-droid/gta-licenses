@@ -32,9 +32,7 @@
       "laws.html",
       "auth.html",
       "generator.html",
-      "package.json",
-      "node_modules/electron-log/**/*",
-      "node_modules/electron-updater/**/*"
+      "package.json"
     ],
     "win": {
       "target": "portable",
@@ -55,7 +53,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "ElliotHolland",
+      "owner": "ktotamsu99-droid",
       "repo": "gta-licenses",
       "releaseType": "release"
     }

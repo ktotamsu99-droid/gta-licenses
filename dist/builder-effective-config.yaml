@@ -13,8 +13,6 @@ files:
       - auth.html
       - generator.html
       - package.json
-      - node_modules/electron-log/**/*
-      - node_modules/electron-updater/**/*
 win:
   target: portable
   compression: maximum
@@ -31,7 +29,7 @@ portable:
   artifactName: GTA_Licenses_Portable_${version}.exe
 publish:
   provider: github
-  owner: ElliotHolland
+  owner: ktotamsu99-droid
   repo: gta-licenses
   releaseType: release
 electronVersion: 28.3.3
