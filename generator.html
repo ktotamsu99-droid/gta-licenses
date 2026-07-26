@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор ключей + Discord</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { 
+            background: #0a0a14; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #dce4f0;
+        }
+        .container {
+            width: 600px;
+            max-width: 95%;
+            background: rgba(8, 8, 20, 0.9);
+            border-radius: 16px;
+            border: 1px solid rgba(255,215,0,0.1);
+            padding: 30px 28px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+        }
+        h1 { color: #ffd700; font-size: 22px; margin-bottom: 6px; text-align: center; }
+        .sub { text-align: center; color: rgba(255,255,255,0.2); font-size: 12px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,215,0,0.08);
+            border-radius: 8px;
+            color: #dce4f0;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: rgba(255,215,0,0.2);
+            background: rgba(255,255,255,0.08);
+        }
+        .form-group select option { background: #1a1a2e; }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 8px;
+            color: #ffd700;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+        .btn:hover { background: rgba(255,215,0,0.15); border-color: rgba(255,215,0,0.3); }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .result-box {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(255,215,0,0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255,215,0,0.06);
+            display: none;
+        }
+        .result-box.active { display: block; }
+        .result-box .key {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffd700;
+            text-align: center;
+            letter-spacing: 2px;
+            word-break: break-all;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+        .result-box .status-msg {
+            text-align: center;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+        .result-box .status-msg.success { color: #4cd964; }
+        .result-box .status-msg.error { color: #ff4757; }
+        .result-box .status-msg.pending { color: #ffa502; }
+
+        .webhook-section {
+            background: rgba(255,215,0,0.02);
+            border: 1px solid rgba(255,215,0,0.04);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+        .webhook-section label { font-size: 10px; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+        .webhook-section input {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 6px;
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            outline: none;
+        }
+        .webhook-section .hint { font-size: 9px; color: rgba(255,255,255,0.08); margin-top: 4px; }
+
+        .history {
+            margin-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.03);
+            padding-top: 14px;
+        }
+        .history h3 { color: rgba(255,255,255,0.15); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.01);
+            border-radius: 4px;
+            margin-bottom: 2px;
+            font-size: 11px;
+        }
+        .history-item .hk { font-family: 'Courier New', monospace; color: rgba(255,215,0,0.3); }
+        .history-item .hd { color: rgba(255,255,255,0.08); font-size: 9px; }
+        .history-item .hstatus { font-size: 9px; }
+        .history-item .hstatus.sent { color: #4cd964; }
+        .history-item .hstatus.fail { color: #ff4757; }
+
+        .no-history { color: rgba(255,255,255,0.04); text-align: center; font-size: 11px; padding: 8px 0; }
+
+        .copy-btn {
+            margin-top: 8px;
+            padding: 6px 16px;
+            background: rgba(255,215,0,0.06);
+            border: 1px solid rgba(255,215,0,0.08);
+            border-radius: 6px;
+            color: rgba(255,215,0,0.4);
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover { background: rgba(255,215,0,0.1); color: #ffd700; }
+
+        @media (max-width: 480px) {
+            .container { padding: 18px 14px; }
+            .result-box .key { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Генератор + Discord</h1>
+        <div class="sub">Создавайте ключи и отправляйте их в Discord</div>
+
+        <!-- Webhook настройка (УЖЕ ЗАПОЛНЕНА ВАШИМ ХУКОМ) -->
+        <div class="webhook-section">
+            <label>🔗 Discord Webhook URL</label>
+            <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." value="https://discord.com/api/webhooks/1530356213995540682/-O51jdsCrtop04I2sPlNJXd7YZsqtFGisMtWqaGLsC8smXnr9Rwey6qxYTr1Zkmk45hx">
+            <div class="hint">Ваш Webhook уже заполнен. Для смены — вставьте новый URL.</div>
+        </div>
+
+        <div class="form-group">
+            <label>Срок действия (дней)</label>
+            <select id="daysSelect">
+                <option value="3">3 дня</option>
+                <option value="7" selected>7 дней</option>
+                <option value="14">14 дней</option>
+                <option value="30">30 дней</option>
+                <option value="60">60 дней</option>
+                <option value="90">90 дней</option>
+                <option value="180">180 дней</option>
+                <option value="365">1 год</option>
+                <option value="0">Бессрочно</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Префикс (опционально)</label>
+            <input type="text" id="prefixInput" placeholder="Например: PREMIUM-" value="">
+        </div>
+
+        <button class="btn" id="generateBtn">✨ Сгенерировать и отправить в Discord</button>
+
+        <div class="result-box" id="resultBox">
+            <div class="key" id="generatedKey">----</div>
+            <div class="status-msg" id="statusMsg"></div>
+            <button class="copy-btn" id="copyBtn">📋 Скопировать ключ</button>
+        </div>
+
+        <div class="history">
+            <h3>📋 История (ключи, отправленные в Discord)</h3>
+            <div id="historyContainer">
+                <div class="no-history">Пока нет отправленных ключей</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const webhookInput = document.getElementById('webhookInput');
+        const daysSelect = document.getElementById('daysSelect');
+        const prefixInput = document.getElementById('prefixInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultBox = document.getElementById('resultBox');
+        const generatedKey = document.getElementById('generatedKey');
+        const statusMsg = document.getElementById('statusMsg');
+        const copyBtn = document.getElementById('copyBtn');
+        const historyContainer = document.getElementById('historyContainer');
+
+        // Загружаем сохранённый Webhook (если меняли)
+        const savedWebhook = localStorage.getItem('discordWebhook');
+        if (savedWebhook) webhookInput.value = savedWebhook;
+
+        // Загружаем историю
+        let history = JSON.parse(localStorage.getItem('keyHistoryDiscord') || '[]');
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div class="no-history">Пока нет отправленных ключей</div>';
+                return;
+            }
+            let html = '';
+            history.slice().reverse().forEach(item => {
+                const statusClass = item.status === 'sent' ? 'sent' : 'fail';
+                const statusText = item.status === 'sent' ? '✅' : '❌';
+                html += `
+                    <div class="history-item">
+                        <span class="hk">${item.key}</span>
+                        <span class="hd">${item.days} дн. • ${item.date}</span>
+                        <span class="hstatus ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            });
+            historyContainer.innerHTML = html;
+        }
+
+        async function sendToDiscord(key, days) {
+            const webhookUrl = webhookInput.value.trim();
+            if (!webhookUrl) {
+                return { success: false, message: '❌ Не указан Webhook URL' };
+            }
+
+            const expiryText = days === 0 ? 'Бессрочно' : `${days} дней`;
+            const message = {
+                content: `🔑 **Новый ключ доступа**\n\n**Ключ:** \`${key}\`\n**Срок действия:** ${expiryText}\n**Статус:** ✅ Не использован`,
+                embeds: [{
+                    color: 0xffd700,
+                    title: '🎫 Новый лицензионный ключ',
+                    fields: [
+                        { name: '🔑 Ключ', value: `\`${key}\``, inline: true },
+                        { name: '📅 Срок', value: expiryText, inline: true },
+                        { name: '📌 Статус', value: '✅ Не использован', inline: true }
+                    ],
+                    footer: { text: 'Генератор ключей • GTA Licenses' },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(message)
+                });
+
+                if (response.ok) {
+                    return { success: true, message: '✅ Ключ отправлен в Discord!' };
+                } else {
+                    return { success: false, message: `❌ Ошибка отправки: ${response.status}` };
+                }
+            } catch (e) {
+                return { success: false, message: `❌ Ошибка: ${e.message}` };
+            }
+        }
+
+        async function generateKey() {
+            const days = parseInt(daysSelect.value);
+            const prefix = prefixInput.value.trim();
+            
+            // Сохраняем Webhook
+            localStorage.setItem('discordWebhook', webhookInput.value.trim());
+
+            // Генерируем ключ
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let randomPart = '';
+            for (let i = 0; i < 12; i++) {
+                randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const formatted = randomPart.match(/.{4}/g).join('-');
+            const key = prefix ? `${prefix}${formatted}` : formatted;
+
+            // Показываем статус
+            statusMsg.textContent = '⏳ Отправка в Discord...';
+            statusMsg.className = 'status-msg pending';
+            resultBox.classList.add('active');
+            generatedKey.textContent = key;
+            generateBtn.disabled = true;
+
+            // Отправляем в Discord
+            const result = await sendToDiscord(key, days);
+
+            // Сохраняем в историю
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            history.push({
+                key: key,
+                days: days,
+                date: dateStr,
+                timestamp: now.getTime(),
+                status: result.success ? 'sent' : 'fail'
+            });
+            localStorage.setItem('keyHistoryDiscord', JSON.stringify(history));
+            renderHistory();
+
+            // Показываем результат
+            statusMsg.textContent = result.message;
+            statusMsg.className = result.success ? 'status-msg success' : 'status-msg error';
+            generateBtn.disabled = false;
+
+            if (result.success) {
+                copyBtn.textContent = '📋 Скопировать ключ';
+            }
+        }
+
+        // Копирование
+        copyBtn.addEventListener('click', () => {
+            const key = generatedKey.textContent;
+            if (key && key !== '----') {
+                navigator.clipboard.writeText(key).then(() => {
+                    copyBtn.textContent = '✅ Скопировано!';
+                    setTimeout(() => { copyBtn.textContent = '📋 Скопировать ключ'; }, 2000);
+                });
+            }
+        });
+
+        generateBtn.addEventListener('click', generateKey);
+        prefixInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generateKey(); });
+        webhookInput.addEventListener('change', () => {
+            localStorage.setItem('discordWebhook', webhookInput.value.trim());
+        });
+
+        renderHistory();
+    </script>
+</body>
+</html>

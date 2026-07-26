@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Активация лицензии</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
+        body { background:transparent; display:flex; justify-content:center; align-items:center; height:100vh; }
+        .window {
+            width: 420px;
+            background: rgba(8,8,20,0.88);
+            backdrop-filter: blur(14px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,215,0,0.08);
+            padding: 30px 28px;
+            color: #dce4f0;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+        }
+        .window h1 { color: #ffd700; font-size: 20px; margin-bottom: 6px; }
+        .window .sub { color: rgba(255,255,255,0.2); font-size: 12px; margin-bottom: 20px; }
+        .window input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,215,0,0.12);
+            border-radius: 8px;
+            color: #dce4f0;
+            font-size: 14px;
+            outline: none;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .window input:focus { border-color: rgba(255,215,0,0.3); }
+        .window .btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            background: rgba(255,215,0,0.1);
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 8px;
+            color: #ffd700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .window .btn:hover { background: rgba(255,215,0,0.15); }
+        .window .status { font-size: 13px; margin-top: 12px; min-height: 20px; }
+        .window .status.success { color: #4cd964; }
+        .window .status.error { color: #ff4757; }
+        .window .status.info { color: #5a8aff; }
+        .window .info { font-size: 10px; color: rgba(255,255,255,0.08); margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 12px; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <h1>🔑 Активация</h1>
+        <div class="sub">Введите ключ доступа из Discord</div>
+        <input type="text" id="keyInput" placeholder="Введите ключ..." autocomplete="off">
+        <button class="btn" id="activateBtn">✅ Активировать</button>
+        <div class="status" id="statusMsg">Введите ключ</div>
+        <div class="info">Ключ можно получить у администратора в Discord</div>
+    </div>
+    <script>
+        const keyInput = document.getElementById('keyInput');
+        const activateBtn = document.getElementById('activateBtn');
+        const statusMsg = document.getElementById('statusMsg');
+
+        function setStatus(type, msg) {
+            statusMsg.textContent = msg;
+            statusMsg.className = 'status ' + type;
+        }
+
+        window.electronAPI.checkLicense();
+
+        window.electronAPI.onLicenseStatus((status) => {
+            if (status.valid) {
+                setStatus('success', '✅ ' + status.message);
+                setTimeout(() => window.electronAPI.closeWindow(), 1500);
+            } else {
+                setStatus('error', 'ℹ️ ' + status.message);
+            }
+        });
+
+        window.electronAPI.onActivationResult((result) => {
+            if (result.success) {
+                setStatus('success', '✅ ' + result.message);
+                setTimeout(() => window.electronAPI.closeWindow(), 1500);
+            } else {
+                setStatus('error', '❌ ' + result.message);
+                keyInput.value = '';
+                keyInput.focus();
+            }
+        });
+
+        window.electronAPI.onLicenseReady(() => { window.electronAPI.closeWindow(); });
+
+        function activate() {
+            const key = keyInput.value.trim().toUpperCase();
+            if (!key) { setStatus('error', '⚠️ Введите ключ'); return; }
+            setStatus('info', '⏳ Проверка через Discord...');
+            window.electronAPI.activateLicense(key);
+        }
+
+        activateBtn.addEventListener('click', activate);
+        keyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') activate(); });
+        setTimeout(() => keyInput.focus(), 300);
+    </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "name": "gta-licenses",
+  "version": "1.0.2",
+  "description": "GTA 5 RP Licenses Overlay",
+  "author": "Elliot Holland",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "build:setup": "electron-builder --win nsis",
+    "publish": "electron-builder --win portable --publish always"
+  },
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "electron-log": "^5.0.1",
+    "electron-updater": "^6.1.7"
+  },
+  "build": {
+    "appId": "com.gta.licenses",
+    "productName": "GTA Licenses",
+    "copyright": "2026 Elliot Holland",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "updater.js",
+      "preload.js",
+      "laws.html",
+      "auth.html",
+      "generator.html",
+      "package.json",
+      "node_modules/electron-log/**/*",
+      "node_modules/electron-updater/**/*"
+    ],
+    "win": {
+      "target": "portable",
+      "compression": "maximum"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "GTA Licenses",
+      "uninstallDisplayName": "GTA Licenses Overlay",
+      "artifactName": "GTA_Licenses_Setup_${version}.exe"
+    },
+    "portable": {
+      "artifactName": "GTA_Licenses_Portable_${version}.exe"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "ElliotHolland",
+      "repo": "gta-licenses",
+      "releaseType": "release"
+    }
+  }
+}

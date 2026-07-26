@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GTA Licenses</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: transparent !important; overflow: hidden; }
+        
+        #container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            z-index: 999999;
+        }
+
+        .window {
+            width: 96%; max-width: 1500px; height: 94vh;
+            background: rgba(8, 8, 20, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,215,0,0.06);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            color: #e8edf5;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .header {
+            padding: 12px 24px;
+            background: rgba(0,0,0,0.25);
+            border-bottom: 1px solid rgba(255,215,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            min-height: 50px;
+            pointer-events: none;
+        }
+        .header h2 { font-size: 19px; font-weight: 700; color: #ffd700; letter-spacing: 0.5px; }
+        .header .sub { font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .top-right {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .subscription-timer-top {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 215, 0, 0.6);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 5px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,215,0,0.08);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            pointer-events: none;
+            white-space: nowrap;
+            min-width: 140px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .subscription-timer-top.active {
+            color: rgba(76, 217, 100, 0.6);
+            border-color: rgba(76, 217, 100, 0.1);
+        }
+        .subscription-timer-top.expiring {
+            color: rgba(255, 165, 0, 0.7);
+            border-color: rgba(255, 165, 0, 0.12);
+            animation: pulseTop 1.5s infinite;
+        }
+        .subscription-timer-top.expired {
+            color: rgba(255, 50, 50, 0.5);
+            border-color: rgba(255, 50, 50, 0.08);
+        }
+        @keyframes pulseTop {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .subscription-timer-top .label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.12);
+            margin-right: 4px;
+            font-weight: 400;
+        }
+        .subscription-timer-top .time {
+            font-weight: 700;
+        }
+
+        .signature-top {
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(255, 215, 0, 0.35);
+            letter-spacing: 1px;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 5px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,215,0,0.06);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .signature-top:hover {
+            color: rgba(255, 215, 0, 0.8);
+            border-color: rgba(255,215,0,0.15);
+            background: rgba(0, 0, 0, 0.25);
+            box-shadow: 0 0 30px rgba(255,215,0,0.05);
+        }
+        .signature-top .name { 
+            font-weight: 600; 
+            color: rgba(255,215,0,0.5); 
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+        }
+        .signature-top:hover .name { color: rgba(255,215,0,0.8); }
+        .signature-top .by { font-size: 10px; color: rgba(255, 255, 255, 0.12); margin-right: 4px; }
+        .signature-top .heart { color: rgba(255, 70, 70, 0.25); margin: 0 4px; font-size: 11px; transition: all 0.3s ease; }
+        .signature-top:hover .heart { color: rgba(255, 70, 70, 0.6); }
+        .signature-top .discord-icon { font-size: 12px; margin-left: 6px; color: rgba(88, 101, 242, 0.35); transition: all 0.3s ease; }
+        .signature-top:hover .discord-icon { color: rgba(88, 101, 242, 0.7); }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 10px 24px 0 24px;
+            background: rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255,215,0,0.02);
+            flex-shrink: 0;
+            pointer-events: auto;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+        }
+        .tabs::-webkit-scrollbar { height: 2px; }
+        .tabs::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.2); border-radius: 10px; }
+
+        .tab-btn {
+            padding: 10px 22px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            pointer-events: auto;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .tab-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,215,0,0.03); }
+        .tab-btn.active { color: #ffd700; border-bottom: 2px solid #ffd700; }
+
+        .page {
+            display: none;
+            padding: 14px 24px 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+            pointer-events: auto;
+            cursor: default;
+        }
+        .page.active { display: block; }
+        .page * {
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .page a {
+            pointer-events: auto !important;
+            color: #ffd700;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            text-decoration-color: rgba(255,215,0,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            word-break: break-all;
+        }
+        .page a:hover { color: #fff; text-decoration-color: #ffd700; }
+
+        .page::-webkit-scrollbar { width: 5px; }
+        .page::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .page::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.2); border-radius: 10px; }
+        .page::-webkit-scrollbar-thumb:hover { background: rgba(255,215,0,0.35); }
+
+        .title { 
+            font-size: 16px; 
+            font-weight: 700; 
+            margin: 14px 0 6px 0; 
+            color: #ffd700;
+            border-left: 3px solid #ffd700;
+            padding-left: 12px;
+        }
+        .subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #7a8aaa;
+            margin: 8px 0 6px 0;
+            padding: 5px 14px;
+            background: rgba(255,215,0,0.06);
+            border-radius: 4px;
+            border-left: 2px solid rgba(255,215,0,0.25);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 2px 14px;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        .grid li { 
+            list-style: none; 
+            padding: 3px 0; 
+            color: #b0c0d8; 
+            font-size: 12px; 
+            line-height: 1.4;
+        }
+        .grid li::before { content: '▸ '; color: #ffd700; font-weight: 700; }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 14px;
+            font-size: 10px;
+            font-weight: 600;
+            margin: 2px 3px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .tag-gold { background: rgba(255,215,0,0.12); color: #ffd700; }
+        .tag-red { background: rgba(255,70,70,0.12); color: #ff6b6b; }
+        .tag-green { background: rgba(50,200,50,0.12); color: #4cd964; }
+        .tag-blue { background: rgba(70,130,255,0.12); color: #5a8aff; }
+
+        .license-card {
+            background: rgba(255,215,0,0.02);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,215,0,0.04);
+        }
+        .license-card .header-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .license-card .header-row .icon { font-size: 16px; }
+        .license-card .header-row .name { font-size: 13px; font-weight: 600; color: #ffd700; }
+        .license-card .prices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 16px;
+            font-size: 11px;
+            color: #8aa0c0;
+        }
+        .license-card .prices .gold { color: #ffd700; }
+
+        /* ===== КАЛЬКУЛЯТОР ===== */
+        .calculator-section {
+            background: rgba(255,215,0,0.02);
+            border: 1px solid rgba(255,215,0,0.06);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 8px 0 12px 0;
+        }
+        .calculator-section .calc-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11.5px;
+        }
+        .calc-table th {
+            text-align: center;
+            padding: 6px 8px;
+            color: #ffd700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,215,0,0.06);
+            white-space: nowrap;
+        }
+        .calc-table td {
+            text-align: center;
+            padding: 5px 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #b0c8e0;
+            font-size: 11px;
+            vertical-align: middle;
+        }
+        .calc-table .sub-header td {
+            color: #7a8aaa;
+            font-size: 10px;
+            border-bottom: 1px solid rgba(255,215,0,0.04);
+            padding: 3px 6px;
+        }
+        .calc-table .sub-header .left { text-align: left; }
+        .calc-table .price-cell {
+            font-weight: 600;
+            color: #ffd700;
+            font-size: 12px;
+        }
+        .calc-table .input-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 2px 0;
+        }
+        .calc-table .input-cell .btn-minus,
+        .calc-table .input-cell .btn-plus {
+            background: rgba(255,215,0,0.06);
+            border: 1px solid rgba(255,215,0,0.08);
+            border-radius: 4px;
+            color: #ffd700;
+            font-size: 14px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .calc-table .input-cell .btn-minus:hover,
+        .calc-table .input-cell .btn-plus:hover {
+            background: rgba(255,215,0,0.15);
+            border-color: rgba(255,215,0,0.2);
+        }
+        .calc-table .input-cell .btn-minus:active,
+        .calc-table .input-cell .btn-plus:active {
+            transform: scale(0.92);
+        }
+        .calc-table .input-cell input {
+            width: 45px;
+            padding: 3px 4px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,215,0,0.08);
+            border-radius: 4px;
+            color: #dce4f0;
+            font-size: 12px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+            pointer-events: auto;
+        }
+        .calc-table .input-cell input:focus {
+            border-color: rgba(255,215,0,0.2);
+            background: rgba(255,255,255,0.08);
+        }
+        .calc-table .input-cell input::-webkit-inner-spin-button,
+        .calc-table .input-cell input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .calc-table .input-cell input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .calc-table .totals td {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 6px;
+            border-top: 2px solid rgba(255,215,0,0.08);
+        }
+        .calc-table .totals .total-label { color: #7a8aaa; font-weight: 400; }
+        .calc-table .totals .total-value { color: #ffd700; font-weight: 700; }
+        .calc-table .totals .total-value.green { color: #4cd964; }
+        .calc-table .totals .total-value.blue { color: #5a8aff; }
+        .calc-table .totals .total-value.orange { color: #ffa502; }
+
+        .reset-btn {
+            padding: 5px 16px;
+            background: rgba(255,70,70,0.08);
+            border: 1px solid rgba(255,70,70,0.1);
+            border-radius: 6px;
+            color: #ff4757;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            pointer-events: auto;
+        }
+        .reset-btn:hover { background: rgba(255,70,70,0.15); }
+
+        /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 22px;
+            background: rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,215,0,0.03);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            pointer-events: auto;
+        }
+        .top-bar .version {
+            font-size: 11px;
+            color: rgba(255,255,255,0.15);
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+        .top-bar .version span {
+            color: #ffd700;
+            font-weight: 600;
+        }
+        .top-bar .update-btn {
+            padding: 4px 14px;
+            background: rgba(255,215,0,0.06);
+            border: 1px solid rgba(255,215,0,0.08);
+            border-radius: 14px;
+            color: rgba(255,215,0,0.4);
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            pointer-events: auto;
+            font-weight: 500;
+        }
+        .top-bar .update-btn:hover {
+            background: rgba(255,215,0,0.12);
+            border-color: rgba(255,215,0,0.15);
+            color: #ffd700;
+        }
+        .top-bar .update-btn:active {
+            transform: scale(0.95);
+        }
+        .top-bar .update-status {
+            font-size: 10px;
+            color: rgba(255,255,255,0.08);
+            pointer-events: none;
+        }
+
+        .hotkey {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.04);
+            font-size: 9px;
+            background: rgba(0,0,0,0.08);
+            padding: 3px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.02);
+            pointer-events: none;
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            font-size: 10px;
+            color: rgba(255,255,255,0.05);
+            text-align: center;
+            padding: 10px 0 4px 0;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            margin-top: 10px;
+        }
+
+        .question-block {
+            margin-bottom: 10px;
+            padding: 6px 14px 8px 14px;
+            background: rgba(255,215,0,0.02);
+            border-radius: 6px;
+            border-left: 2px solid rgba(255,215,0,0.08);
+        }
+        .question-block .q { color: #ffd700; font-size: 12px; font-weight: 500; }
+        .question-block .a { color: #8aa0c0; font-size: 11px; margin-top: 2px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.02); }
+
+        .page-title { 
+            font-size: 17px; 
+            font-weight: 700; 
+            color: #ffd700; 
+            margin-bottom: 14px; 
+            border-bottom: 1px solid rgba(255,215,0,0.08); 
+            padding-bottom: 8px; 
+        }
+        .page-sub { 
+            font-size: 12px; 
+            color: #7a8aaa; 
+            margin: -6px 0 10px 0; 
+            padding: 4px 14px; 
+            background: rgba(255,215,0,0.04); 
+            border-radius: 4px; 
+            border-left: 2px solid rgba(255,215,0,0.1); 
+        }
+
+        /* ===== БЛОК СТАТЕЙ, ЗАПРЕЩАЮЩИХ ВЫДАЧУ ===== */
+        .criminal-block {
+            background: rgba(255,215,0,0.03);
+            border: 1px solid rgba(255,215,0,0.08);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 8px 0 12px 0;
+        }
+        .criminal-block .label {
+            color: #ffd700;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .criminal-block .stars {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .criminal-block .star-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 10.5px;
+            font-weight: 500;
+        }
+        .star-item.star-1 { background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.15); color: #ffd700; }
+        .star-item.star-2 { background: rgba(255, 165, 0, 0.08); border: 1px solid rgba(255, 165, 0, 0.15); color: #ffa500; }
+        .star-item.star-3 { background: rgba(255, 50, 50, 0.08); border: 1px solid rgba(255, 50, 50, 0.15); color: #ff4757; }
+        .star-item .star-icon { font-size: 12px; }
+        .star-item .star-desc { font-size: 10px; opacity: 0.7; }
+
+        .criminal-lists {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .criminal-lists .list-col {
+            background: rgba(0,0,0,0.15);
+            border-radius: 6px;
+            padding: 6px 10px;
+        }
+        .criminal-lists .list-col .col-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .criminal-lists .list-col .col-title.star-1-title { color: #ffd700; }
+        .criminal-lists .list-col .col-title.star-2-title { color: #ffa500; }
+        .criminal-lists .list-col .col-title.star-3-title { color: #ff4757; }
+        .criminal-lists .list-col .col-articles {
+            font-size: 10px;
+            color: #8aa0c0;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+        .criminal-lists .list-col .col-articles .highlight-gold { color: #ffd700; }
+        .criminal-lists .list-col .col-articles .highlight-orange { color: #ffa500; }
+        .criminal-lists .list-col .col-articles .highlight-red { color: #ff4757; }
+
+        .criminal-ban {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: rgba(255, 50, 50, 0.06);
+            border-radius: 6px;
+            border-left: 3px solid #ff4757;
+            font-size: 11px;
+            color: #c8d0e0;
+        }
+        .criminal-ban .ban-icon { color: #ff4757; font-weight: 700; }
+
+        /* ===== ПРОГРЕСС-БАР ОБНОВЛЕНИЙ ===== */
+        #updateProgressContainer {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 420px;
+            background: rgba(0,0,0,0.85);
+            border-radius: 12px;
+            padding: 16px 20px;
+            z-index: 99999;
+            border: 1px solid rgba(255,215,0,0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+        }
+        #updateProgressContainer .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        #updateProgressContainer .update-header .update-title {
+            color: #ffd700;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        #updateProgressContainer .update-header .update-percent {
+            color: #dce4f0;
+            font-size: 12px;
+        }
+        #updateProgressContainer .update-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #updateProgressContainer .update-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff6b35);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        #updateProgressContainer .update-info {
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        #updateProgressContainer .update-info span {
+            color: rgba(255,255,255,0.2);
+            font-size: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .window { width: 98%; height: 96vh; }
+            .tab-btn { font-size: 10px; padding: 8px 12px; }
+            .signature-top { font-size: 10px; padding: 3px 10px; }
+            .signature-top .name { font-size: 10px; }
+            .header h2 { font-size: 15px; }
+            .subscription-timer-top { font-size: 11px; padding: 3px 10px; min-width: 90px; }
+            .top-right { gap: 4px; right: 10px; top: 4px; }
+            .calc-table { font-size: 9px; }
+            .calc-table .input-cell input { width: 30px; font-size: 9px; padding: 2px 2px; }
+            .calc-table .input-cell .btn-minus,
+            .calc-table .input-cell .btn-plus { width: 18px; height: 18px; font-size: 11px; }
+            .calc-table th { font-size: 7px; padding: 3px 3px; }
+            .calc-table td { font-size: 8px; padding: 2px 3px; }
+            .calculator-section { padding: 8px 10px; }
+            .criminal-lists { grid-template-columns: 1fr; gap: 6px; }
+            .criminal-block .stars { flex-direction: column; }
+            .top-bar { padding: 6px 14px; gap: 8px; }
+            .top-bar .version { font-size: 10px; }
+            .top-bar .update-btn { font-size: 9px; padding: 3px 10px; }
+            #updateProgressContainer { width: 90%; bottom: 50px; padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="window" id="win">
+
+            <div class="top-right">
+                <div class="subscription-timer-top" id="subscriptionTimerTop">
+                    <span class="label">⏳</span>
+                    <span class="time" id="timerDisplayTop">--:--:--:--</span>
+                </div>
+                <a href="https://discord.gg/FKWWCXPpe" target="_blank" class="signature-top" title="Присоединиться к Discord">
+                    <span class="by">✦</span>
+                    <span class="by">by</span>
+                    <span class="name">Elliot Holland</span>
+                    <span class="heart">♥</span>
+                    <span class="discord-icon">💬</span>
+                </a>
+            </div>
+
+            <div class="header">
+                <div><h2>📜 Лицензии GTA 5 RP</h2><span class="sub">Штат Сан-Андреас</span></div>
+            </div>
+
+            <!-- ===== ВЕРХНЯЯ ПАНЕЛЬ ===== -->
+            <div class="top-bar" id="topBar">
+                <div class="version">
+                    Версия: <span id="appVersion">1.0.2</span>
+                </div>
+                <button class="update-btn" id="checkUpdateBtn">🔍 Проверить обновления</button>
+                <span class="update-status" id="updateStatus"></span>
+            </div>
+
+            <div class="tabs" id="tabs">
+                <button class="tab-btn active" data-page="page_main">📋 Главная</button>
+                <button class="tab-btn" data-page="page_calc">💰 Калькулятор</button>
+                <button class="tab-btn" data-page="page_weapon">⚡ Оружие</button>
+                <button class="tab-btn" data-page="page_hunt">🏹 Охота</button>
+                <button class="tab-btn" data-page="page_fish">🎣 Рыболовство</button>
+                <button class="tab-btn" data-page="page_business">💼 Бизнес</button>
+            </div>
+
+            <div class="page active" id="page_main"></div>
+            <div class="page" id="page_calc"></div>
+            <div class="page" id="page_weapon"></div>
+            <div class="page" id="page_hunt"></div>
+            <div class="page" id="page_fish"></div>
+            <div class="page" id="page_business"></div>
+        </div>
+    </div>
+
+    <!-- ===== ПРОГРЕСС-БАР ОБНОВЛЕНИЙ ===== -->
+    <div id="updateProgressContainer">
+        <div class="update-header">
+            <span class="update-title">⬇️ Загрузка обновления</span>
+            <span class="update-percent" id="updatePercent">0%</span>
+        </div>
+        <div class="update-bar-bg">
+            <div class="update-bar" id="updateProgressBar"></div>
+        </div>
+        <div class="update-info">
+            <span id="updateSpeed">Скорость: 0 MB/s</span>
+            <span id="updateSize">0 MB из 0 MB</span>
+        </div>
+    </div>
+
+    <div class="hotkey">F7 — Показать/Скрыть</div>
+
+    <script>
+        // ============================================
+        // ДАННЫЕ
+        // ============================================
+        const generalRequirements = [
+            'Иметь при себе действующий паспорт (ID)',
+            'Иметь действующую медицинскую карту с отметками: <span style="color:#ffd700;">✔ A и ✔ Y</span> (исключение: отметка A без Y, если выдана дежурным врачом)',
+            'Для получения лицензий на оружие — отсутствие судимостей по ст. 30.1 Закона об обороте оружия'
+        ];
+
+        const licensesInfo = [
+            {
+                id: 'weapon',
+                name: 'Лицензия на оружие',
+                icon: '🔫',
+                price: '10.000$',
+                exam: '15.000$',
+                examToTreasury: '5.000$',
+                nightExam: '30.000$',
+                nightToTreasury: '5.000$',
+                nightTime: '01:00 — 09:00'
+            },
+            {
+                id: 'gov_weapon',
+                name: 'Льготная лицензия для гос. служащих',
+                icon: '🛡️',
+                price: '10.000$',
+                exam: '10.000$',
+                examToTreasury: '5.000$',
+                nightExam: '20.000$',
+                nightToTreasury: '5.000$',
+                nightTime: '01:00 — 09:00',
+                note: 'Требуется: удостоверение, жетон, бейдж, форма'
+            },
+            {
+                id: 'fish',
+                name: 'Лицензия на рыбалку',
+                icon: '🎣',
+                price: '10.000$',
+                exam: '15.000$',
+                examToTreasury: '5.000$',
+                nightExam: '30.000$',
+                nightToTreasury: '5.000$',
+                nightTime: '01:00 — 09:00'
+            },
+            {
+                id: 'hunt',
+                name: 'Лицензия на охоту',
+                icon: '🏹',
+                price: '10.000$',
+                exam: '20.000$',
+                examToTreasury: '10.000$',
+                nightExam: '40.000$',
+                nightToTreasury: '10.000$',
+                nightTime: '01:00 — 09:00'
+            },
+            {
+                id: 'business',
+                name: 'Лицензия на бизнес',
+                icon: '💼',
+                price: '50.000$',
+                exam: '30.000$',
+                examToTreasury: '15.000$',
+                nightExam: '60.000$',
+                nightToTreasury: '15.000$',
+                nightTime: '01:00 — 09:00'
+            }
+        ];
+
+        const specialMeans = [
+            'Бронежилеты любого образца', 'Тайзер', 'Резиновая дубинка',
+            'Наручники', 'Перцовый газ', 'Гранатомёт',
+            'Сигнальная ракетница', 'Светошумовые гранаты'
+        ];
+
+        // ============================================
+        // ДАННЫЕ ДЛЯ КАЛЬКУЛЯТОРА
+        // ============================================
+        const calculatorData = [
+            { id: 'weapon', label: 'Оружие', icon: '🔫', toHand: 10000, toTreasury: 5000 },
+            { id: 'gov_weapon', label: 'Гос.Оружие', icon: '🛡️', toHand: 5000, toTreasury: 5000 },
+            { id: 'fish', label: 'Рыбалка', icon: '🎣', toHand: 10000, toTreasury: 5000 },
+            { id: 'hunt', label: 'Охота', icon: '🏹', toHand: 10000, toTreasury: 10000 },
+            { id: 'business', label: 'Бизнес', icon: '💼', toHand: 15000, toTreasury: 15000 }
+        ];
+
+        // ============================================
+        // ВОПРОСЫ ДЛЯ СТРАНИЦ
+        // ============================================
+        const questionsData = {
+            weapon: {
+                title: 'ВОПРОСЫ ДЛЯ ЛИЦЕНЗИИ НА ОРУЖИЕ',
+                subtitle: 'Для получения лицензии на легкое / среднее оружие',
+                questions: [
+                    { q: 'Для чего Вам нужна лицензия на оружие как гражданскому?', a: 'Для легального хранения и приобретения оружия.' },
+                    { q: 'В каких случаях Вы будете использовать оружие как гражданский?', a: 'Исключительно в случаях самообороны.' },
+                    { q: 'Как делится огнестрельное оружие по калибру?', a: 'Малокалиберное — 9 мм, 5,56 мм, 12 мм<br>Крупнокалиберное — 7,62 мм, 11,43 мм, 12.7 мм (.50 BMG)' },
+                    { q: 'Как делится оружие по доступности к обороту?', a: 'Служебное — MAY/LSPD/LSSD/ARMY/PRIS/FIB<br>Гражданское — AM или F' },
+                    { q: 'Что такое спецсредства?', a: 'Комплекс устройств для работы правоохранительных органов, спецслужб и частных организаций.' },
+                    { q: 'Какие существуют спецсредства?', a: 'Бронежилеты, Тайзер, Дубинка, Наручники, Перцовый газ, Гранатомёт, Сигнальная ракетница.' },
+                    { q: 'У каких лиц Вы можете приобретать огнестрельное оружие?', a: 'У лиц с лицензией на предпринимательство и коллекционирование оружия.' },
+                    { q: 'Где и в каком виде необходимо хранить оружие?', a: 'В сейфе, в разряженном состоянии, на предохранителе.' },
+                    { q: 'Как необходимо осуществлять ношение оружия гражданскому лицу?', a: 'Скрытое ношение: в кобуре за спиной или в сумке.' },
+                    { q: 'В каком случае разрешается перевозка оружия в багажнике?', a: 'Только в служебном автомобиле правоохранительных органов.' },
+                    { q: 'В каком случае разрешается использование оружия в жилище?', a: 'В случае незаконного проникновения в жилище.' },
+                    { q: 'В каком случае разрешено хранение боеприпасов 7.62mm, 11.43mm?', a: 'Сотрудникам правоохранительных органов или гражданским с лицензией коллекционера оружия.' },
+                    { q: 'В случае акта самообороны, Вы кого-то ранили или убили. Ваши действия?', a: 'Оказать первую помощь, вызвать EMS и правоохранительные органы.' }
+                ]
+            },
+            hunt: {
+                title: 'ВОПРОСЫ ДЛЯ ЛИЦЕНЗИИ НА ОХОТУ',
+                subtitle: 'Для получения лицензии на промышленную охоту',
+                questions: [
+                    { q: 'Что такое охотничьи угодья?', a: 'Территории, в границах которых допускается осуществление видов деятельности в сфере охоты.' },
+                    { q: 'Какие существуют виды охоты?', a: 'Любительская охота<br>Промышленная охота' },
+                    { q: 'Какова норма добычи ресурсов у любительской и промышленной охоты?', a: 'Любительская — не более 10 кг<br>Промышленная — не более 40 кг' },
+                    { q: 'Можно ли охотиться с применением капканов и других устройств?', a: 'Можно, если имеется лицензия на промышленную охоту.' },
+                    { q: 'Каковы основные ограничения любительской охоты?', a: 'Запрет на взрывчатые и химические вещества, электроток<br>Запрет на капканы и другие устройства<br>Запрет вне охотничьих угодий округа Блейн<br>Норма — не более 10 кг' },
+                    { q: 'Какие существуют методы охоты?', a: 'Использование охотничьих сооружений, собак охотничьих пород, ловчих птиц.' },
+                    { q: 'Какие существуют виды контроля и надзора в области охоты?', a: 'Общественный контроль<br>Государственный контроль' }
+                ]
+            },
+            fish: {
+                title: 'ВОПРОСЫ ДЛЯ ЛИЦЕНЗИИ НА РЫБОЛОВСТВО',
+                subtitle: 'Для получения лицензии на промышленное рыболовство',
+                questions: [
+                    { q: 'Какие существуют виды рыболовства?', a: 'Любительское рыболовство<br>Промышленное рыболовство' },
+                    { q: 'Какова норма добычи водных биоресурсов?', a: 'Любительское — не более 10 кг<br>Промышленное — не более 90 кг' },
+                    { q: 'Что является рыбоохранной зоной?', a: 'Территория, прилегающая к акватории водного объекта рыбохозяйственного значения.' },
+                    { q: 'Какие существуют виды контроля и надзора в области рыболовства?', a: 'Общественный контроль<br>Государственный контроль' },
+                    { q: 'В каких случаях возмещается вред, причиненный водным биоресурсам?', a: 'В добровольном порядке или по требованию правоохранительных структур.' },
+                    { q: 'Можно ли использовать водный транспорт (суды, лодки, катера)?', a: 'Можно, в случае наличия лицензии на промышленное рыболовство.' },
+                    { q: 'Каковы основные ограничения промышленного рыболовства?', a: 'Запрет на взрывчатые и химические вещества, электроток<br>Запрет на сетные орудия добычи<br>Запрет на подводную охоту<br>Норма — не более 90 кг' }
+                ]
+            },
+            business: {
+                title: 'ВОПРОСЫ ДЛЯ ЛИЦЕНЗИИ НА БИЗНЕС',
+                subtitle: 'Для получения лицензии на предпринимательскую деятельность',
+                questions: [
+                    { q: 'Какие требования для ведения предпринимательской деятельности?', a: 'Не находиться под следствием, в розыске, не иметь задолженностей по судебному решению, иметь соответствующую лицензию.' },
+                    { q: 'Каково максимальное количество малых бизнесов может иметь гражданин?', a: '3 малых бизнеса.' },
+                    { q: 'Каковы различия при регистрации коммерческой и некоммерческой организации?', a: 'При регистрации некоммерческой организации необходимо представить устав организации.' },
+                    { q: 'Что такое малые и средние предприятия?', a: 'Малые — до 10 человек<br>Средние — от 10 до 40 человек' },
+                    { q: 'Какое лицо признается индивидуальным предпринимателем?', a: 'Физическое лицо, зарегистрированное в установленном порядке.' },
+                    { q: 'Где осуществляется регистрация предприятий?', a: 'В правительстве штата, через сотрудника Государственного Казначейства.' },
+                    { q: 'Каковы санкции при неуплате налогов?', a: 'Отзыв лицензии и приостановка деятельности.' },
+                    { q: 'В каком случае можно возобновить деятельность предприятия после отзыва лицензии?', a: 'Лицензия может быть приобретена вновь, оплатив 50% от стартового капитала и суммы налога.' },
+                    { q: 'Что необходимо для регистрации индивидуального предпринимателя?', a: 'Наличие лицензии на малый/средний бизнес.' }
+                ]
+            }
+        };
+
+        // ============================================
+        // КАЛЬКУЛЯТОР
+        // ============================================
+        function renderCalculator() {
+            const container = document.getElementById('page_calc');
+            let html = '';
+
+            html += `
+                <div class="calculator-section">
+                    <div class="calc-title">
+                        <span>💰 КАЛЬКУЛЯТОР ЛИЦЕНЗИЙ</span>
+                        <button class="reset-btn" onclick="resetCalculator()">🔄 Сброс</button>
+                    </div>
+                    <table class="calc-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;width:70px;min-width:55px;">Лицензии</th>
+                                <th colspan="2" style="min-width:80px;">Оружие</th>
+                                <th colspan="2" style="min-width:80px;">Гос.Оружие</th>
+                                <th colspan="2" style="min-width:80px;">Рыбалка</th>
+                                <th colspan="2" style="min-width:80px;">Охота</th>
+                                <th colspan="2" style="min-width:80px;">Бизнес</th>
+                            </tr>
+                            <tr class="sub-header">
+                                <td></td>
+                                <td class="left">На руки</td>
+                                <td class="left">В казну</td>
+                                <td class="left">На руки</td>
+                                <td class="left">В казну</td>
+                                <td class="left">На руки</td>
+                                <td class="left">В казну</td>
+                                <td class="left">На руки</td>
+                                <td class="left">В казну</td>
+                                <td class="left">На руки</td>
+                                <td class="left">В казну</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align:left;font-weight:600;color:#ffd700;">Цена</td>
+            `;
+
+            calculatorData.forEach(item => {
+                html += `
+                    <td class="price-cell">${item.toHand.toLocaleString()}</td>
+                    <td class="price-cell">${item.toTreasury.toLocaleString()}</td>
+                `;
+            });
+
+            html += `
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;font-weight:600;color:#7a8aaa;">Количество</td>
+            `;
+
+            calculatorData.forEach(item => {
+                html += `
+                    <td colspan="2" style="padding:2px 0;">
+                        <div class="input-cell">
+                            <button class="btn-minus" onclick="changeCount('${item.id}', -1)">−</button>
+                            <input type="number" class="calc-input" id="count_${item.id}" data-id="${item.id}" value="0" min="0" step="1">
+                            <button class="btn-plus" onclick="changeCount('${item.id}', 1)">+</button>
+                        </div>
+                    </td>
+                `;
+            });
+
+            html += `
+                            </tr>
+                            <tr class="totals">
+                                <td style="text-align:left;font-weight:600;color:#7a8aaa;">Итоги</td>
+                                <td colspan="2"><span class="total-label">Общий</span> <span class="total-value" id="totalGeneral">0</span></td>
+                                <td colspan="2"><span class="total-label">В казну</span> <span class="total-value blue" id="totalTreasury">0</span></td>
+                                <td colspan="2"><span class="total-label">Прибыль</span> <span class="total-value green" id="totalProfit">0</span></td>
+                                <td colspan="2"><span class="total-label">Всего лицензий</span> <span class="total-value orange" id="totalCount">0</span></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+            document.querySelectorAll('.calc-input').forEach(input => {
+                input.addEventListener('input', updateCalculator);
+                input.addEventListener('change', updateCalculator);
+            });
+
+            updateCalculator();
+        }
+
+        // ============================================
+        // ФУНКЦИИ КАЛЬКУЛЯТОРА
+        // ============================================
+        function changeCount(id, delta) {
+            const input = document.getElementById(`count_${id}`);
+            if (input) {
+                let val = parseInt(input.value) || 0;
+                val = Math.max(0, val + delta);
+                input.value = val;
+                updateCalculator();
+            }
+        }
+
+        function updateCalculator() {
+            let totalGeneral = 0;
+            let totalTreasury = 0;
+            let totalProfit = 0;
+            let totalCount = 0;
+
+            calculatorData.forEach((item) => {
+                const input = document.getElementById(`count_${item.id}`);
+                const count = parseInt(input ? input.value : 0) || 0;
+
+                totalGeneral += count * (item.toHand + item.toTreasury);
+                totalTreasury += count * item.toTreasury;
+                totalProfit += count * item.toHand;
+                totalCount += count;
+            });
+
+            document.getElementById('totalGeneral').textContent = totalGeneral.toLocaleString();
+            document.getElementById('totalTreasury').textContent = totalTreasury.toLocaleString();
+            document.getElementById('totalProfit').textContent = totalProfit.toLocaleString();
+            document.getElementById('totalCount').textContent = totalCount;
+        }
+
+        function resetCalculator() {
+            calculatorData.forEach(item => {
+                const input = document.getElementById(`count_${item.id}`);
+                if (input) input.value = 0;
+            });
+            updateCalculator();
+        }
+
+        // ============================================
+        // ГЛАВНАЯ СТРАНИЦА
+        // ============================================
+        function renderMainPage() {
+            const container = document.getElementById('page_main');
+            let html = '';
+
+            // Общие требования
+            html += `<div class="title">📋 ОБЩИЕ ТРЕБОВАНИЯ К ЗАЯВИТЕЛЯМ</div>`;
+            html += `<ul class="grid" style="grid-template-columns: 1fr;">`;
+            generalRequirements.forEach(req => {
+                html += `<li>${req}</li>`;
+            });
+            html += `</ul>`;
+
+            // Блок статей, запрещающих выдачу
+            html += `
+                <div class="criminal-block">
+                    <div class="label">⚖️ СТАТЬИ, ЗАПРЕЩАЮЩИЕ ВЫДАЧУ</div>
+                    <div class="stars">
+                        <span class="star-item star-1">
+                            <span class="star-icon">⭐</span>
+                            <span>7 дней</span>
+                            <span class="star-desc">— лёгкие</span>
+                        </span>
+                        <span class="star-item star-2">
+                            <span class="star-icon">⭐⭐</span>
+                            <span>21 день</span>
+                            <span class="star-desc">— средние</span>
+                        </span>
+                        <span class="star-item star-3">
+                            <span class="star-icon">⭐⭐⭐</span>
+                            <span>Навсегда</span>
+                            <span class="star-desc">— выдача запрещена</span>
+                        </span>
+                    </div>
+
+                    <div class="criminal-lists">
+                        <div class="list-col">
+                            <div class="col-title star-1-title">⭐ 7 дней</div>
+                            <div class="col-articles">
+                                <span class="highlight-gold">8.2, 10.7, 12.8, 12.11, 12.12, 13.1, 16.1, 16.5, 16.8, 17.6, 18.4, 18.5.1 УК</span>
+                            </div>
+                        </div>
+                        <div class="list-col">
+                            <div class="col-title star-2-title">⭐⭐ 21 день</div>
+                            <div class="col-articles">
+                                <span class="highlight-orange">6.1, 6.5, 7.2, 7.3, 8.1, 10.4, 10.8, 12.1.1, 12.1.2, 12.6.1, 12.8.1, 12.9, 12.10, 13.2, 15.6 ч.2–3, 15.7, 16.3, 16.4, 16.9, 16.10, 16.11, 16.12, 16.13, 16.13.1, 16.14, 17.12, 17.2.1, 17.3, 18.1, 18.2, 18.3, 18.5, 18.6 УК</span>
+                            </div>
+                        </div>
+                        <div class="list-col">
+                            <div class="col-title star-3-title">⭐⭐⭐ Навсегда</div>
+                            <div class="col-articles">
+                                <span class="highlight-red">6.2, 6.3, 7.1, 12.1, 12.10.1, 13.2.1, 14.2, 14.2.1, 16.2, 16.6, 16.7, 17.1, 17.1.1 УК</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="criminal-ban">
+                        <span class="ban-icon">🚫</span> Также запрещено при наличии глав <span style="color:#ffd700;">VII</span>, <span style="color:#ffd700;">XVI</span> и <span style="color:#ffd700;">XVIII</span> УК
+                    </div>
+                </div>
+            `;
+
+            // Лицензии
+            html += `<div class="title">📌 ПОРЯДОК ПОЛУЧЕНИЯ ГОСУДАРСТВЕННЫХ ЛИЦЕНЗИЙ</div>`;
+
+            licensesInfo.forEach(lic => {
+                html += `
+                    <div class="license-card">
+                        <div class="header-row">
+                            <span class="icon">${lic.icon}</span>
+                            <span class="name">${lic.name}</span>
+                            ${lic.note ? `<span style="font-size:9px;color:rgba(255,215,0,0.2);margin-left:auto;">${lic.note}</span>` : ''}
+                        </div>
+                        <div class="prices">
+                            <div>💵 <span class="gold">Стоимость лицензии:</span> ${lic.price}</div>
+                            <div>✏️ <span class="gold">Экзамен:</span> ${lic.exam} <span style="color:rgba(255,255,255,0.15);">(в казну: ${lic.examToTreasury})</span></div>
+                        </div>
+                        <div style="font-size:10px;color:rgba(255,215,0,0.15);margin-top:4px;border-top:1px solid rgba(255,215,0,0.03);padding-top:4px;">
+                            ⏰ <span style="color:rgba(255,215,0,0.2);">В период с ${lic.nightTime}:</span>
+                            <span style="color:#ffa500;">✏️ Экзамен: ${lic.nightExam} <span style="color:rgba(255,255,255,0.1);">(в казну: ${lic.nightToTreasury})</span></span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Спецсредства
+            html += `<div class="title">🛡️ РАЗРЕШЁННЫЕ СПЕЦСРЕДСТВА</div>`;
+            html += `<ul class="grid" style="grid-template-columns: repeat(4, 1fr);">`;
+            specialMeans.forEach(item => {
+                html += `<li>${item}</li>`;
+            });
+            html += `</ul>`;
+
+            html += `
+                <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.06);border-radius:6px;padding:10px 14px;margin:8px 0 12px 0;">
+                    <div style="color:#ffd700;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">⚠️ ВАЖНО</div>
+                    <div style="color:#8aa0c0;font-size:11px;margin-top:2px;">
+                        • <span style="color:#ffd700;">ст. 28 ч. 1</span> — Перевозка оружия в багажнике ЗАПРЕЩЕНА (кроме служебного транспорта гос. структур)<br>
+                        • <span style="color:#ffd700;">ст. 26 ч. 1</span> — Хранение оружия: разряжено, предохранитель включён, в запираемом сейфе
+                    </div>
+                </div>
+                <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.06);border-radius:6px;padding:10px 14px;margin:8px 0 12px 0;">
+                    <div style="color:#ffd700;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">📖 ОПРЕДЕЛЕНИЯ</div>
+                    <div style="color:#8aa0c0;font-size:11px;margin-top:2px;">
+                        • <span style="color:#ffd700;">Водные биоресурсы</span> — рыбы, водные беспозвоночные, млекопитающие, водоросли, растения в состоянии естественной свободы<br>
+                        • <span style="color:#ffd700;">Любительское рыболовство</span> — для личных потребностей и спортивных мероприятий<br>
+                        • <span style="color:#ffd700;">Промышленное рыболовство</span> — с использованием судов, лодок, катеров
+                    </div>
+                </div>
+            `;
+
+            html += `
+                <div style="background:rgba(255,50,50,0.06);border:1px solid rgba(255,50,50,0.1);border-radius:8px;padding:12px 16px;margin:10px 0 6px 0;">
+                    <div style="color:#ff4757;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;">❗ ВАЖНАЯ ИНФОРМАЦИЯ</div>
+                    <div style="color:#d0d8e8;font-size:11.5px;line-height:1.6;">
+                        <ul style="list-style:none;padding:0;margin:2px 0 0 0;">
+                            <li style="padding:2px 0 2px 18px;color:#c8d0e0;font-size:11px;position:relative;">▸ Экзамен, проводимый сотрудниками, должен состоять из <span style="color:#ffd700;">четырех вопросов</span>.</li>
+                            <li style="padding:2px 0 2px 18px;color:#c8d0e0;font-size:11px;position:relative;">▸ У гражданина имеется <span style="color:#ffd700;">одно право на ошибку</span>.</li>
+                            <li style="padding:2px 0 2px 18px;color:#c8d0e0;font-size:11px;position:relative;">▸ В случае <span style="color:#ff4757;">двух и более ошибок</span> экзамен считается проваленным, а <span style="color:#ff4757;">деньги за него не возвращаются</span>.</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            html += `<div style="margin-top:10px;">`;
+            html += `<span class="tag tag-gold">Лицензии</span>`;
+            html += `<span class="tag tag-red">Оружие</span>`;
+            html += `<span class="tag tag-green">Рыболовство</span>`;
+            html += `<span class="tag tag-blue">Охота</span>`;
+            html += `<span class="tag tag-gold">ИП</span>`;
+            html += `</div>`;
+
+            html += `<div class="footer">Верховный Суд • Штат Сан-Андреас • GTA5RP</div>`;
+
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // ГЕНЕРАЦИЯ СТРАНИЦ С ВОПРОСАМИ
+        // ============================================
+        function renderQuestionPage(pageId, data) {
+            const container = document.getElementById(pageId);
+            let html = '';
+
+            html += `<div class="page-title">${data.title}</div>`;
+            if (data.subtitle) {
+                html += `<div class="page-sub">${data.subtitle}</div>`;
+            }
+
+            data.questions.forEach((item) => {
+                const answerHtml = item.a.replace(/\n/g, '<br>');
+                html += `
+                    <div class="question-block">
+                        <div class="q">❔ ${item.q}</div>
+                        <div class="a">${answerHtml}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // ТАЙМЕР
+        // ============================================
+        function getLicenseInfo() {
+            try {
+                const data = localStorage.getItem('licenseData');
+                if (data) return JSON.parse(data);
+            } catch (e) {}
+            return null;
+        }
+
+        function formatTime(seconds) {
+            if (seconds <= 0) return '00:00:00:00';
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        let timerIntervalTop = null;
+
+        function startTimerTop() {
+            if (timerIntervalTop) {
+                clearInterval(timerIntervalTop);
+                timerIntervalTop = null;
+            }
+
+            function updateTimerTop() {
+                const licenseInfo = getLicenseInfo();
+                const display = document.getElementById('timerDisplayTop');
+                const container = document.getElementById('subscriptionTimerTop');
+                if (!display || !container) return;
+
+                if (licenseInfo && licenseInfo.expiryDate) {
+                    const now = new Date();
+                    const expiry = new Date(licenseInfo.expiryDate);
+                    const diff = Math.max(0, (expiry - now) / 1000);
+                    const daysLeft = Math.floor(diff / 86400);
+                    
+                    display.textContent = formatTime(diff);
+                    
+                    container.className = 'subscription-timer-top';
+                    if (daysLeft <= 0) container.classList.add('expired');
+                    else if (daysLeft <= 3) container.classList.add('expiring');
+                    else container.classList.add('active');
+                } else {
+                    display.textContent = '--:--:--:--';
+                    container.className = 'subscription-timer-top expired';
+                }
+            }
+
+            updateTimerTop();
+            timerIntervalTop = setInterval(updateTimerTop, 1000);
+        }
+
+        // ============================================
+        // КНОПКА ПРОВЕРКИ ОБНОВЛЕНИЙ
+        // ============================================
+        function checkForUpdates() {
+            const statusEl = document.getElementById('updateStatus');
+            const btnEl = document.getElementById('checkUpdateBtn');
+            
+            statusEl.textContent = '⏳ Проверка...';
+            statusEl.style.color = 'rgba(255,215,0,0.4)';
+            btnEl.disabled = true;
+            
+            if (window.electronAPI && window.electronAPI.checkUpdates) {
+                window.electronAPI.checkUpdates();
+            } else {
+                statusEl.textContent = '⚠️ Функция недоступна';
+                statusEl.style.color = '#ff4757';
+                btnEl.disabled = false;
+                setTimeout(() => {
+                    statusEl.textContent = '';
+                }, 3000);
+            }
+        }
+
+        // ============================================
+        // ОБРАБОТЧИКИ ОТВЕТОВ ОБНОВЛЕНИЙ
+        // ============================================
+        function onUpdateResult(result) {
+            const statusEl = document.getElementById('updateStatus');
+            const btnEl = document.getElementById('checkUpdateBtn');
+            
+            btnEl.disabled = false;
+            
+            if (result && result.hasUpdate) {
+                statusEl.textContent = '🔔 Доступно обновление!';
+                statusEl.style.color = '#ffd700';
+                setTimeout(() => {
+                    statusEl.textContent = '';
+                }, 5000);
+            } else if (result && result.error) {
+                statusEl.textContent = '❌ Ошибка проверки';
+                statusEl.style.color = '#ff4757';
+                setTimeout(() => {
+                    statusEl.textContent = '';
+                }, 3000);
+            } else {
+                statusEl.textContent = '✅ Обновлений нет';
+                statusEl.style.color = '#4cd964';
+                setTimeout(() => {
+                    statusEl.textContent = '';
+                }, 3000);
+            }
+        }
+
+        // ============================================
+        // ПРОГРЕСС-БАР ОБНОВЛЕНИЙ
+        // ============================================
+        if (window.electronAPI) {
+            window.electronAPI.onUpdateProgress((progress) => {
+                const container = document.getElementById('updateProgressContainer');
+                const bar = document.getElementById('updateProgressBar');
+                const percent = document.getElementById('updatePercent');
+                const speed = document.getElementById('updateSpeed');
+                const size = document.getElementById('updateSize');
+                
+                if (container) container.style.display = 'block';
+                if (bar) bar.style.width = progress.percent + '%';
+                if (percent) percent.textContent = Math.round(progress.percent) + '%';
+                
+                if (speed) {
+                    const mbps = (progress.bytesPerSecond / 1024 / 1024).toFixed(1);
+                    speed.textContent = `Скорость: ${mbps} MB/s`;
+                }
+                
+                if (size) {
+                    const totalMB = (progress.total / 1024 / 1024).toFixed(1);
+                    const transferredMB = (progress.transferred / 1024 / 1024).toFixed(1);
+                    size.textContent = `${transferredMB} MB из ${totalMB} MB`;
+                }
+            });
+            
+            window.electronAPI.onUpdateStatus((status) => {
+                const container = document.getElementById('updateProgressContainer');
+                if (status.status === 'no-updates') {
+                    if (container) container.style.display = 'none';
+                }
+                if (status.status === 'update-available') {
+                    // Показываем уведомление, диалог уже показывает updater.js
+                }
+            });
+        }
+
+        // ============================================
+        // РЕНДЕРИНГ
+        // ============================================
+        renderMainPage();
+        renderCalculator();
+        renderQuestionPage('page_weapon', questionsData.weapon);
+        renderQuestionPage('page_hunt', questionsData.hunt);
+        renderQuestionPage('page_fish', questionsData.fish);
+        renderQuestionPage('page_business', questionsData.business);
+
+        // ============================================
+        // ВКЛАДКИ
+        // ============================================
+        const tabs = document.querySelectorAll('.tab-btn');
+        const pages = {
+            page_main: document.getElementById('page_main'),
+            page_calc: document.getElementById('page_calc'),
+            page_weapon: document.getElementById('page_weapon'),
+            page_hunt: document.getElementById('page_hunt'),
+            page_fish: document.getElementById('page_fish'),
+            page_business: document.getElementById('page_business')
+        };
+
+        tabs.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabs.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                Object.values(pages).forEach(p => p.classList.remove('active'));
+                const pageId = this.dataset.page;
+                if (pages[pageId]) pages[pageId].classList.add('active');
+            });
+        });
+
+        // ============================================
+        // УПРАВЛЕНИЕ (F7)
+        // ============================================
+        const container = document.getElementById('container');
+        const win = document.getElementById('win');
+        let visible = true;
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F7') {
+                e.preventDefault();
+                visible = !visible;
+                if (visible) {
+                    container.style.display = 'flex';
+                    win.style.display = 'flex';
+                } else {
+                    container.style.display = 'none';
+                    win.style.display = 'none';
+                }
+            }
+        });
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F7') e.preventDefault();
+        });
+
+        // ============================================
+        // КНОПКА ПРОВЕРКИ ОБНОВЛЕНИЙ
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkBtn = document.getElementById('checkUpdateBtn');
+            if (checkBtn) {
+                checkBtn.addEventListener('click', checkForUpdates);
+            }
+            
+            const versionEl = document.getElementById('appVersion');
+            if (window.electronAPI && window.electronAPI.getVersion) {
+                window.electronAPI.getVersion().then(version => {
+                    if (versionEl) versionEl.textContent = version;
+                });
+            }
+        });
+
+        // ============================================
+        // ЗАПУСК ТАЙМЕРА
+        // ============================================
+        startTimerTop();
+
+        // ============================================
+        // ОБРАБОТЧИК ОТВЕТОВ ОБНОВЛЕНИЙ
+        // ============================================
+        if (window.electronAPI && window.electronAPI.onUpdateResult) {
+            window.electronAPI.onUpdateResult(onUpdateResult);
+        }
+    </script>
+</body>
+</html>
