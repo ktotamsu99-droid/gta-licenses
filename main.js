@@ -9,6 +9,11 @@ const { execSync } = require('child_process');
 const updater = require('./updater.js');
 
 // ============================================
+// ЗАГРУЖАЕМ ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ ИЗ .env
+// ============================================
+require('dotenv').config();
+
+// ============================================
 // КОДИРОВКА КОНСОЛИ
 // ============================================
 if (process.platform === 'win32') {
@@ -132,8 +137,21 @@ function ensureUserDataDir() {
 // ============================================
 
 const https = require('https');
-const BOT_TOKEN = 'MTQ3NzEyOTU2MjUyMDI5MzU4Nw.GFpD9G.pFIbGI6HYhJFoBBoqzzv8Jrh-YN24lKrGeiXww';
-const CHANNEL_ID = '1082856844004954182';
+
+// ============================================
+// 🔐 ТОКЕНЫ БЕРУТСЯ ИЗ .env ФАЙЛА
+// ============================================
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
+
+// ============================================
+// ПРОВЕРКА ЧТО ТОКЕНЫ ЗАГРУЗИЛИСЬ
+// ============================================
+if (!BOT_TOKEN || !CHANNEL_ID) {
+    console.error('[ERROR] Отсутствуют переменные окружения!');
+    console.error('[ERROR] Проверь файл .env в корне проекта');
+    console.error('[ERROR] Нужны: DISCORD_BOT_TOKEN и DISCORD_CHANNEL_ID');
+}
 
 function httpsRequest(options, data = null) {
     return new Promise((resolve, reject) => {
