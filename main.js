@@ -9,55 +9,6 @@ const { execSync } = require('child_process');
 const updater = require('./updater.js');
 
 // ============================================
-// ЗАГРУЖАЕМ ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ ИЗ .env
-// ============================================
-require('dotenv').config();
-
-// ============================================
-// АВТО-СОЗДАНИЕ .env ДЛЯ ПОЛЬЗОВАТЕЛЕЙ
-// ============================================
-function ensureEnvFile() {
-    try {
-        // Путь к .env в папке с программой
-        const envPath = path.join(process.cwd(), '.env');
-        const resourcesPath = path.join(process.resourcesPath, 'app', '.env');
-        
-        // Если .env уже есть — ничего не делаем
-        if (fs.existsSync(envPath)) {
-            console.log('[ENV] .env найден в папке с программой');
-            return;
-        }
-
-        // Пытаемся скопировать .env из ресурсов (если есть)
-        if (app.isPackaged && fs.existsSync(resourcesPath)) {
-            try {
-                fs.copyFileSync(resourcesPath, envPath);
-                console.log('[ENV] ✅ .env скопирован из ресурсов в:', envPath);
-                return;
-            } catch (e) {
-                console.warn('[ENV] Не удалось скопировать .env:', e.message);
-            }
-        }
-
-        // Если файла нет — создаем с дефолтными значениями
-        console.log('[ENV] Создаем новый .env с дефолтными значениями...');
-        
-        // ⚠️ ВАЖНО: ЗАМЕНИ НА НОВЫЙ ТОКЕН!
-        const defaultEnv = `# Discord Bot Token
-DISCORD_BOT_TOKEN=MTQ3NzEyOTU2MjUyMDI5MzU4Nw.GFpD9G.pFIbGI6HYhJFoBBoqzzv8Jrh-YN24lKrGeiXww
-DISCORD_CHANNEL_ID=1082856844004954182
-`;
-
-        fs.writeFileSync(envPath, defaultEnv);
-        console.log('[ENV] ✅ .env создан автоматически в:', envPath);
-        console.log('[ENV] ⚠️ ЗАМЕНИ ТОКЕН НА НОВЫЙ!');
-
-    } catch (error) {
-        console.error('[ENV] Ошибка создания .env:', error.message);
-    }
-}
-
-// ============================================
 // КОДИРОВКА КОНСОЛИ
 // ============================================
 if (process.platform === 'win32') {
@@ -177,14 +128,20 @@ function ensureUserDataDir() {
 
 const https = require('https');
 
+// ============================================
+// 🔐 ТОКЕН БЕРЕТСЯ ИЗ ПЕРЕМЕННЫХ ОКРУЖЕНИЯ
+// ============================================
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 
-if (!BOT_TOKEN || !CHANNEL_ID) {
-    console.error('[ERROR] ❌ Отсутствуют переменные окружения!');
-    console.error('[ERROR] Проверь файл .env в корне проекта');
-    console.error('[ERROR] Нужны: DISCORD_BOT_TOKEN и DISCORD_CHANNEL_ID');
+// Проверка
+if (!BOT_TOKEN) {
+    console.error('[ERROR] ❌ DISCORD_BOT_TOKEN не найден!');
+    console.error('[ERROR] Добавь его в GitHub Secrets или .env');
 }
+
+console.log('[DISCORD] 🔍 Токен загружен (первые 10 символов):', BOT_TOKEN.substring(0, 10) + '...');
+console.log('[DISCORD] 📌 Channel ID:', CHANNEL_ID);
 
 function httpsRequest(options, data = null) {
     return new Promise((resolve, reject) => {
@@ -924,11 +881,6 @@ ipcMain.on('get-version', (event) => {
 app.whenReady().then(async () => {
     console.log('[APP] Запуск GTA Licenses...');
     console.log(`[VERSION] ${updater.CURRENT_VERSION}`);
-
-    // ============================================
-    // 🔐 СОЗДАЕМ .env ЕСЛИ ЕГО НЕТ
-    // ============================================
-    ensureEnvFile();
 
     ensureUserDataDir();
 

@@ -13,7 +13,6 @@ files:
       - auth.html
       - generator.html
       - package.json
-      - .env
       - node_modules/dotenv/**/*
       - node_modules/electron-log/**/*
       - node_modules/electron-updater/**/*
