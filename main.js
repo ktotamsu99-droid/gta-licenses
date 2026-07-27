@@ -14,6 +14,50 @@ const updater = require('./updater.js');
 require('dotenv').config();
 
 // ============================================
+// АВТО-СОЗДАНИЕ .env ДЛЯ ПОЛЬЗОВАТЕЛЕЙ
+// ============================================
+function ensureEnvFile() {
+    try {
+        // Путь к .env в папке с программой
+        const envPath = path.join(process.cwd(), '.env');
+        const resourcesPath = path.join(process.resourcesPath, 'app', '.env');
+        
+        // Если .env уже есть — ничего не делаем
+        if (fs.existsSync(envPath)) {
+            console.log('[ENV] .env найден в папке с программой');
+            return;
+        }
+
+        // Пытаемся скопировать .env из ресурсов (если есть)
+        if (app.isPackaged && fs.existsSync(resourcesPath)) {
+            try {
+                fs.copyFileSync(resourcesPath, envPath);
+                console.log('[ENV] ✅ .env скопирован из ресурсов в:', envPath);
+                return;
+            } catch (e) {
+                console.warn('[ENV] Не удалось скопировать .env:', e.message);
+            }
+        }
+
+        // Если файла нет — создаем с дефолтными значениями
+        console.log('[ENV] Создаем новый .env с дефолтными значениями...');
+        
+        // ⚠️ ВАЖНО: ЗАМЕНИ НА НОВЫЙ ТОКЕН!
+        const defaultEnv = `# Discord Bot Token
+DISCORD_BOT_TOKEN=MTQ3NzEyOTU2MjUyMDI5MzU4Nw.GFpD9G.pFIbGI6HYhJFoBBoqzzv8Jrh-YN24lKrGeiXww
+DISCORD_CHANNEL_ID=1082856844004954182
+`;
+
+        fs.writeFileSync(envPath, defaultEnv);
+        console.log('[ENV] ✅ .env создан автоматически в:', envPath);
+        console.log('[ENV] ⚠️ ЗАМЕНИ ТОКЕН НА НОВЫЙ!');
+
+    } catch (error) {
+        console.error('[ENV] Ошибка создания .env:', error.message);
+    }
+}
+
+// ============================================
 // КОДИРОВКА КОНСОЛИ
 // ============================================
 if (process.platform === 'win32') {
@@ -46,7 +90,6 @@ function getHWID() {
     const parts = [];
     
     try {
-        // Материнская плата
         try {
             const result = execSync('wmic baseboard get serialnumber', { 
                 stdio: ['ignore', 'pipe', 'ignore'],
@@ -56,7 +99,6 @@ function getHWID() {
             if (line && line.length > 0) parts.push(line);
         } catch (e) {}
 
-        // CPU
         try {
             const result = execSync('wmic cpu get processorid', {
                 stdio: ['ignore', 'pipe', 'ignore'],
@@ -66,7 +108,6 @@ function getHWID() {
             if (line && line.length > 0) parts.push(line);
         } catch (e) {}
 
-        // Диск
         try {
             const result = execSync('wmic diskdrive get serialnumber', {
                 stdio: ['ignore', 'pipe', 'ignore'],
@@ -79,7 +120,6 @@ function getHWID() {
             }
         } catch (e) {}
 
-        // MAC
         try {
             const result = execSync('getmac /v /fo csv /nh', {
                 stdio: ['ignore', 'pipe', 'ignore'],
@@ -95,7 +135,6 @@ function getHWID() {
             }
         } catch (e) {}
 
-        // Если ничего не получили — используем установочную папку как ID
         if (parts.length === 0) {
             try {
                 const installPath = app.getPath('exe');
@@ -138,17 +177,11 @@ function ensureUserDataDir() {
 
 const https = require('https');
 
-// ============================================
-// 🔐 ТОКЕНЫ БЕРУТСЯ ИЗ .env ФАЙЛА
-// ============================================
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 
-// ============================================
-// ПРОВЕРКА ЧТО ТОКЕНЫ ЗАГРУЗИЛИСЬ
-// ============================================
 if (!BOT_TOKEN || !CHANNEL_ID) {
-    console.error('[ERROR] Отсутствуют переменные окружения!');
+    console.error('[ERROR] ❌ Отсутствуют переменные окружения!');
     console.error('[ERROR] Проверь файл .env в корне проекта');
     console.error('[ERROR] Нужны: DISCORD_BOT_TOKEN и DISCORD_CHANNEL_ID');
 }
@@ -507,19 +540,19 @@ function createAuthWindow() {
                         background: rgba(8,8,20,0.88);
                         backdrop-filter: blur(14px);
                         border-radius: 16px;
-                        border: 1px solid rgba(255,215,0,0.08);
+                        border: 1px solid rgba(90,138,255,0.08);
                         padding: 30px 28px;
                         color: #dce4f0;
                         text-align: center;
                         box-shadow: 0 30px 80px rgba(0,0,0,0.8);
                     }
-                    .window h1 { color: #ffd700; font-size: 20px; margin-bottom: 6px; }
+                    .window h1 { color: #5a8aff; font-size: 20px; margin-bottom: 6px; }
                     .window .sub { color: rgba(255,255,255,0.2); font-size: 12px; margin-bottom: 20px; }
                     .window input {
                         width: 100%;
                         padding: 12px;
                         background: rgba(255,255,255,0.05);
-                        border: 1px solid rgba(255,215,0,0.12);
+                        border: 1px solid rgba(90,138,255,0.12);
                         border-radius: 8px;
                         color: #dce4f0;
                         font-size: 14px;
@@ -527,20 +560,20 @@ function createAuthWindow() {
                         text-align: center;
                         letter-spacing: 2px;
                     }
-                    .window input:focus { border-color: rgba(255,215,0,0.3); }
+                    .window input:focus { border-color: rgba(90,138,255,0.3); }
                     .window .btn {
                         width: 100%;
                         padding: 12px;
                         margin-top: 12px;
-                        background: rgba(255,215,0,0.1);
-                        border: 1px solid rgba(255,215,0,0.15);
+                        background: rgba(90,138,255,0.1);
+                        border: 1px solid rgba(90,138,255,0.15);
                         border-radius: 8px;
-                        color: #ffd700;
+                        color: #5a8aff;
                         font-size: 14px;
                         cursor: pointer;
                         transition: 0.3s;
                     }
-                    .window .btn:hover { background: rgba(255,215,0,0.15); }
+                    .window .btn:hover { background: rgba(90,138,255,0.15); }
                     .window .status { font-size: 13px; margin-top: 12px; min-height: 20px; }
                     .window .status.success { color: #4cd964; }
                     .window .status.error { color: #ff4757; }
@@ -663,7 +696,6 @@ function createMainWindow() {
 
         mainWindow.on('closed', () => { mainWindow = null; });
 
-        // ===== МЕНЮ =====
         const menu = Menu.buildFromTemplate([
             {
                 label: '📋 Программа',
@@ -720,9 +752,6 @@ function createMainWindow() {
             }
         });
 
-        // ============================================
-        // 🚀 ЗАПУСКАЕМ ПРОВЕРКУ ОБНОВЛЕНИЙ
-        // ============================================
         setTimeout(() => {
             updater.checkForUpdates(mainWindow);
         }, 3000);
@@ -874,10 +903,6 @@ ipcMain.on('close-window', () => {
     if (!isQuitting) { isQuitting = true; app.quit(); }
 });
 
-// ============================================
-// ОБРАБОТЧИКИ ДЛЯ КНОПКИ ПРОВЕРКИ ОБНОВЛЕНИЙ
-// ============================================
-
 ipcMain.on('check-updates', (event) => {
     console.log('[APP] Ручная проверка обновлений');
     try {
@@ -899,13 +924,16 @@ ipcMain.on('get-version', (event) => {
 app.whenReady().then(async () => {
     console.log('[APP] Запуск GTA Licenses...');
     console.log(`[VERSION] ${updater.CURRENT_VERSION}`);
-    
-    // Создаем директорию для данных
+
+    // ============================================
+    // 🔐 СОЗДАЕМ .env ЕСЛИ ЕГО НЕТ
+    // ============================================
+    ensureEnvFile();
+
     ensureUserDataDir();
 
     console.log(`[HWID] ${HWID.substring(0, 30)}...`);
 
-    // Проверяем локальную лицензию
     const local = getLocalActivation();
     
     if (local && local.expiryDate) {
@@ -921,7 +949,6 @@ app.whenReady().then(async () => {
         }
     }
 
-    // Если лицензии нет — проверяем Discord
     let discordAvailable = false;
     try {
         const test = await getMessagesFromChannel(1);
