@@ -10,15 +10,13 @@ jobs:
     runs-on: windows-latest
     
     steps:
-      # 1. Обновлено до v4 (использует Node.js 24)
       - name: Checkout code
         uses: actions/checkout@v4
         
-      # 2. Обновлено до v4 (использует Node.js 24)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # Версия Node.js для твоего проекта
+          node-version: '18'
           
       - name: Install dependencies
         run: npm install
@@ -26,13 +24,14 @@ jobs:
       - name: Build app
         run: npm run build:setup
         env:
-          # 3. ЯВНО передаем секреты в окружение для сборки
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # 👈 ВАЖНО! Передаем токен в сборку
           
       - name: Create Release
-        uses: softprops/action-gh-release@v2 # Обновленная версия
+        uses: softprops/action-gh-release@v2
         with:
           files: dist/*.exe
+          generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
