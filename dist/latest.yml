@@ -1,8 +1,8 @@
-version: 2.0.2
+version: 2.0.4
 files:
-  - url: GTA_Licenses_Setup_2.0.2.exe
-    sha512: Am3ZFkLjCZJDBeAlHQoBY/QDtX+dJ0q1ENFpWalBR9b1qFoc+CRWEAVMp5o+s1zOXmCx2FzeohEJH41G9FtPKw==
-    size: 76515609
-path: GTA_Licenses_Setup_2.0.2.exe
-sha512: Am3ZFkLjCZJDBeAlHQoBY/QDtX+dJ0q1ENFpWalBR9b1qFoc+CRWEAVMp5o+s1zOXmCx2FzeohEJH41G9FtPKw==
-releaseDate: '2026-07-26T18:23:41.216Z'
+  - url: GTA_Licenses_Setup_2.0.4.exe
+    sha512: EPsxgo+d1EW7dX2HBu93YM7sWiVIGnch9mrGOeg8+/4tz9p1ScgDd8/vLXwdZXeG4a3DtA+sJMwF4GlP5joRtQ==
+    size: 76529579
+path: GTA_Licenses_Setup_2.0.4.exe
+sha512: EPsxgo+d1EW7dX2HBu93YM7sWiVIGnch9mrGOeg8+/4tz9p1ScgDd8/vLXwdZXeG4a3DtA+sJMwF4GlP5joRtQ==
+releaseDate: '2026-07-27T19:55:07.853Z'

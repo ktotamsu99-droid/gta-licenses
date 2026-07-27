@@ -1,6 +1,6 @@
 {
   "name": "gta-licenses",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "description": "GTA 5 RP Licenses Overlay",
   "author": "Elliot Holland",
   "main": "main.js",
@@ -15,7 +15,7 @@
     "electron-builder": "^24.6.4"
   },
   "dependencies": {
-    "dotenv": "^17.4.2",
+    "dotenv": "^16.4.5",
     "electron-log": "^5.0.1",
     "electron-updater": "^6.1.7"
   },
@@ -33,7 +33,10 @@
       "laws.html",
       "auth.html",
       "generator.html",
-      "package.json"
+      "package.json",
+      "node_modules/dotenv/**/*",
+      "node_modules/electron-log/**/*",
+      "node_modules/electron-updater/**/*"
     ],
     "win": {
       "target": "portable",

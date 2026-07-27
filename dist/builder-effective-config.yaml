@@ -13,6 +13,9 @@ files:
       - auth.html
       - generator.html
       - package.json
+      - node_modules/dotenv/**/*
+      - node_modules/electron-log/**/*
+      - node_modules/electron-updater/**/*
 win:
   target: portable
   compression: maximum
